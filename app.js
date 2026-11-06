@@ -3,6 +3,7 @@ const zenn = "https://zenn.dev/microsoft/articles/github-universe-2026-all-updat
 
 const slides = [
   {
+    id: "cover",
     kind: "cover",
     chapter: "はじめに",
     title: "GitHub Universe 2026<br>注目アップデート",
@@ -11,6 +12,7 @@ const slides = [
     links: [{ label: "公式recapを見る", url: recap }],
   },
   {
+    id: "overview",
     kind: "overview",
     chapter: "全体像",
     title: "開発の流れに、AIを組み込む。",
@@ -204,6 +206,7 @@ const slides = [
     ],
   },
   {
+    id: "summary",
     kind: "summary",
     chapter: "まとめ",
     title: "開発の流れそのものを、<br>アップデートする。",
@@ -216,6 +219,7 @@ const slides = [
     links: [{ label: "出典一覧へ", action: "references" }],
   },
   {
+    id: "intelligence",
     kind: "supplement",
     chapter: "補足 · Copilot",
     title: "チームの知識を、<br>エージェントが使える文脈に。",
@@ -225,6 +229,7 @@ const slides = [
     links: [{ label: "公式発表", url: "https://github.blog/changelog/2026-10-28-github-intelligence-puts-your-code-context-and-history-to-work/" }],
   },
   {
+    id: "workflows",
     kind: "supplement",
     chapter: "補足 · Copilot",
     title: "エージェントを、<br>自動化の中でも活用する。",
@@ -234,6 +239,7 @@ const slides = [
     links: [{ label: "公式発表", url: "https://github.blog/changelog/2026-10-28-github-agentic-workflows-generally-available/" }],
   },
   {
+    id: "access",
     kind: "supplement",
     chapter: "補足 · Copilot",
     title: "Copilotの使い方と、<br>導入の選択肢が広がる。",
@@ -247,6 +253,7 @@ const slides = [
     ],
   },
   {
+    id: "images",
     kind: "supplement",
     chapter: "補足 · Copilot",
     title: "画像づくりも、<br>開発の文脈の中で。",
@@ -256,6 +263,7 @@ const slides = [
     links: [{ label: "公式発表", url: "https://github.blog/changelog/2026-10-28-generate-and-edit-images-directly-in-copilot/" }],
   },
   {
+    id: "infrastructure",
     kind: "supplement",
     chapter: "補足 · Platform",
     title: "開発を支える基盤にも、<br>改善が広がる。",
@@ -268,6 +276,7 @@ const slides = [
     ],
   },
   {
+    id: "monitoring",
     kind: "supplement",
     chapter: "補足 · Security",
     title: "セキュリティは、<br>コードの外にも目を配る。",
@@ -280,6 +289,7 @@ const slides = [
     ],
   },
   {
+    id: "references",
     kind: "references",
     chapter: "参考資料",
     title: "出典と、さらに詳しい情報。",
@@ -300,9 +310,53 @@ const content = document.querySelector("#slide-content");
 const stage = document.querySelector("#slide");
 const dialog = document.querySelector("#toc-dialog");
 const announcement = document.querySelector("#announcements");
+let language = "ja";
 let current = 0;
 let touchStartX = null;
 let touchStartY = null;
+let disposeVideoControls = () => {};
+
+function t(key, values = {}) {
+  return messages[language][key].replace(/\{(\w+)\}/g, (_, name) => values[name]);
+}
+
+function getSlide(index) {
+  const slide = slides[index];
+  if (language === "ja") return slide;
+  const translation = englishSlides[slide.id];
+  return {
+    ...slide,
+    ...translation,
+    links: slide.links?.map((link, i) => ({ ...link, label: translation.linkLabels[i] })),
+  };
+}
+
+function translateInterface() {
+  document.documentElement.lang = language;
+  document.querySelector('meta[name="description"]').content = t("description");
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  for (const [source, attribute] of [["data-i18n-title", "title"], ["data-i18n-label", "aria-label"]]) {
+    document.querySelectorAll(`[${source}]`).forEach((element) => {
+      element.setAttribute(attribute, t(element.getAttribute(source)));
+    });
+  }
+  const toggle = document.querySelector("#language-toggle");
+  toggle.textContent = t("language");
+  toggle.lang = language === "ja" ? "en" : "ja";
+  toggle.title = t("switchLanguage");
+  toggle.setAttribute("aria-label", t("switchLanguage"));
+  syncFullscreenLabel();
+}
+
+function syncFullscreenLabel() {
+  const active = Boolean(document.fullscreenElement);
+  const button = document.querySelector("#fullscreen-toggle");
+  button.querySelector(".button-label").textContent = t(active ? "exitFullscreen" : "fullscreen");
+  button.title = t(active ? "exitFullscreen" : "enterFullscreen");
+  button.setAttribute("aria-label", button.title);
+}
 
 function externalLinks(links = []) {
   if (!links.length) return "";
@@ -317,26 +371,26 @@ function externalLinks(links = []) {
 
 function videoPanel(slide, index) {
   return `<div class="video-frame" data-slide-video="${index}">
-    <video class="feature-video" controls playsinline preload="none" muted poster="${slide.poster}" aria-label="${slide.chapter}の公式デモ動画">
+    <video class="feature-video" controls playsinline preload="none" muted poster="${slide.poster}">
       <source src="${slide.video}" type="video/mp4">
-      お使いのブラウザーでは動画を再生できません。
+      <span data-i18n="videoUnsupported"></span>
     </video>
-    <div class="video-loading" hidden><span class="spinner" aria-hidden="true"></span>動画を読み込み中…</div>
-    <button class="video-prompt" type="button" aria-label="公式動画を再生">
+    <div class="video-loading" hidden><span class="spinner" aria-hidden="true"></span><span data-i18n="videoLoading"></span></div>
+    <button class="video-prompt" type="button">
       <span class="play-icon" aria-hidden="true">▶</span>
-      <span>動画を再生</span>
+      <span class="play-label"></span>
     </button>
     <div class="video-error" hidden role="alert">
-      <strong>動画を読み込めませんでした</strong>
-      <span>ネットワークを確認して、再試行してください。</span>
-      <button type="button" class="retry-video">再試行</button>
-      <a href="${recap}" target="_blank" rel="noopener noreferrer">公式recapを開く ↗</a>
+      <strong data-i18n="videoError"></strong>
+      <span data-i18n="videoErrorHint"></span>
+      <button type="button" class="retry-video" data-i18n="retry"></button>
+      <a href="${recap}" target="_blank" rel="noopener noreferrer"><span data-i18n="openRecap"></span> ↗</a>
     </div>
     <div class="video-tools">
-      <button class="restart-video" type="button" title="先頭から再生">↺ <span>先頭から</span></button>
-      <button class="toggle-loop" type="button" aria-pressed="false" title="ループ再生を切り替え">ループ: オフ</button>
-      <button class="toggle-mute" type="button" aria-pressed="true" title="音声を有効にする">音声: オフ</button>
-      <span class="video-credit">動画: GitHub Universe</span>
+      <button class="restart-video" type="button" data-i18n-title="restartHint" data-i18n-label="restartHint">↺ <span data-i18n="restart"></span></button>
+      <button class="toggle-loop" type="button" aria-pressed="false" data-i18n-title="loopHint"></button>
+      <button class="toggle-mute" type="button" aria-pressed="false"></button>
+      <span class="video-credit" data-i18n="videoCredit"></span>
     </div>
   </div>`;
 }
@@ -350,7 +404,7 @@ function renderSlide(slide, index) {
         <h1>${slide.title}</h1>
         <p class="cover-subtitle">${slide.subtitle}</p>
         <p class="cover-note">${slide.note}</p>
-        <button class="primary-button" type="button" data-action="next">プレゼンを始める <span aria-hidden="true">→</span></button>
+        <button class="primary-button" type="button" data-action="next">${t("start")} <span aria-hidden="true">→</span></button>
         ${links}
       </div>
       <div class="cover-art" aria-hidden="true">
@@ -379,7 +433,7 @@ function renderSlide(slide, index) {
           <div><h2>${title}</h2><p>${description}</p></div>
           <span class="overview-arrow" aria-hidden="true">↗</span>
         </article>`).join("")}</div>
-      <div class="overview-bottom"><p>${slide.note}</p><button class="primary-button compact-button" type="button" data-action="next">Platformから見る <span aria-hidden="true">→</span></button></div>
+      <div class="overview-bottom"><p>${slide.note}</p><button class="primary-button compact-button" type="button" data-action="next">${t("startPlatform")} <span aria-hidden="true">→</span></button></div>
     </section>`;
   }
   if (slide.kind === "summary") {
@@ -396,10 +450,10 @@ function renderSlide(slide, index) {
     </section>`;
   }
   if (slide.kind === "references") {
-    const sources = slides.slice(2, 14).map((item, i) => `
+    const sources = slides.slice(2, 14).map((_, i) => getSlide(i + 2)).map((item, i) => `
       <a href="${item.links[0].url}" target="_blank" rel="noopener noreferrer" class="reference-item">
         <span class="reference-number">${String(i + 1).padStart(2, "0")}</span>
-        <span><strong>${item.title.replaceAll("<br>", " ")}</strong><small>${item.chapter} · 公式発表 ↗</small></span>
+        <span><strong>${item.title.replaceAll("<br>", " ")}</strong><small>${item.chapter} · ${t("official")} ↗</small></span>
       </a>`).join("");
     return `<section class="slide-layout references-layout">
       <div class="slide-heading">
@@ -414,12 +468,12 @@ function renderSlide(slide, index) {
   const isSupplement = slide.kind === "supplement";
   return `<section class="slide-layout topic-layout ${isSupplement ? "supplement-layout" : ""}">
     <div class="topic-copy">
-      <p class="eyebrow">${isSupplement ? "SUPPLEMENT" : slide.chapter.toUpperCase()} <span class="eyebrow-line"></span> ${isSupplement ? "参考発表" : `${String(index - 1).padStart(2, "0")} / 12`}</p>
+      <p class="eyebrow">${isSupplement ? "SUPPLEMENT" : slide.chapter.toUpperCase()} <span class="eyebrow-line"></span> ${isSupplement ? t("related") : `${String(index - 1).padStart(2, "0")} / 12`}</p>
       <h1>${slide.title}</h1>
       <p class="topic-summary">${slide.summary}</p>
-      ${slide.benefit ? `<div class="benefit-block"><span class="benefit-label">何がうれしい？</span><p>${slide.benefit}</p></div>` : ""}
+      ${slide.benefit ? `<div class="benefit-block"><span class="benefit-label">${t("benefit")}</span><p>${slide.benefit}</p></div>` : ""}
       ${slide.takeaway ? `<p class="takeaway"><span aria-hidden="true">✳</span> ${slide.takeaway}</p>` : ""}
-      ${slide.availability ? `<p class="availability"><span>提供状況</span>${slide.availability}</p>` : ""}
+      ${slide.availability ? `<p class="availability"><span>${t("availability")}</span>${slide.availability}</p>` : ""}
       ${slide.note ? `<p class="supplement-note">${slide.note}</p>` : ""}
       ${links}
     </div>
@@ -434,11 +488,29 @@ function currentPath() {
 }
 
 function stopCurrentVideo() {
+  disposeVideoControls();
   const video = content.querySelector("video");
   if (video) {
     video.pause();
     video.currentTime = 0;
   }
+}
+
+function updateVideoLabels(root) {
+  const video = root.querySelector("video");
+  if (!video) return;
+  const slide = getSlide(Number(root.querySelector(".video-frame").dataset.slideVideo));
+  video.setAttribute("aria-label", t("videoLabel", { chapter: slide.chapter }));
+  const prompt = root.querySelector(".video-prompt");
+  prompt.setAttribute("aria-label", t(video.ended ? "replay" : "playLabel"));
+  prompt.querySelector(".play-label").textContent = t(video.ended ? "replay" : "play");
+  const loopButton = root.querySelector(".toggle-loop");
+  loopButton.textContent = t("loop", { state: t(video.loop ? "on" : "off") });
+  loopButton.setAttribute("aria-pressed", String(video.loop));
+  const muteButton = root.querySelector(".toggle-mute");
+  muteButton.textContent = t("audio", { state: t(video.muted ? "off" : "on") });
+  muteButton.setAttribute("aria-pressed", String(!video.muted));
+  muteButton.title = t(video.muted ? "enableAudio" : "disableAudio");
 }
 
 function syncVideoControls(root) {
@@ -451,6 +523,7 @@ function syncVideoControls(root) {
   const loopButton = root.querySelector(".toggle-loop");
   const muteButton = root.querySelector(".toggle-mute");
   let playbackRequested = false;
+  let disposed = false;
   let loadTimeout;
 
   const clearLoadTimeout = () => {
@@ -458,6 +531,7 @@ function syncVideoControls(root) {
     loadTimeout = undefined;
   };
   const showError = () => {
+    if (disposed) return;
     clearLoadTimeout();
     loading.hidden = true;
     prompt.hidden = true;
@@ -483,16 +557,14 @@ function syncVideoControls(root) {
     clearLoadTimeout();
     loading.hidden = true;
     prompt.hidden = true;
+    updateVideoLabels(root);
   });
   video.addEventListener("error", showError);
   video.addEventListener("ended", () => {
     prompt.hidden = false;
-    prompt.querySelector("span:last-child").textContent = "もう一度再生";
+    updateVideoLabels(root);
   });
-  video.addEventListener("volumechange", () => {
-    muteButton.textContent = `音声: ${video.muted ? "オフ" : "オン"}`;
-    muteButton.setAttribute("aria-pressed", String(!video.muted));
-  });
+  video.addEventListener("volumechange", () => updateVideoLabels(root));
 
   const playVideo = () => {
     playbackRequested = true;
@@ -514,19 +586,32 @@ function syncVideoControls(root) {
   });
   loopButton.addEventListener("click", () => {
     video.loop = !video.loop;
-    loopButton.textContent = `ループ: ${video.loop ? "オン" : "オフ"}`;
-    loopButton.setAttribute("aria-pressed", String(video.loop));
+    updateVideoLabels(root);
   });
   muteButton.addEventListener("click", () => { video.muted = !video.muted; });
+  disposeVideoControls = () => {
+    disposed = true;
+    playbackRequested = false;
+    clearLoadTimeout();
+  };
 }
 
-function render() {
-  stopCurrentVideo();
-  const slide = slides[current];
-  content.innerHTML = renderSlide(slide, current);
+function render(preserveVideo = false) {
+  const slide = getSlide(current);
+  if (preserveVideo && content.querySelector("video")) {
+    // Keep the video connected so playback, buffering, and native fullscreen are uninterrupted.
+    const template = document.createElement("template");
+    template.innerHTML = renderSlide(slide, current);
+    content.querySelector(".topic-copy").replaceWith(template.content.querySelector(".topic-copy"));
+  } else {
+    stopCurrentVideo();
+    content.innerHTML = renderSlide(slide, current);
+    syncVideoControls(content);
+  }
   content.querySelectorAll("[data-action='next']").forEach((button) => button.addEventListener("click", next));
   content.querySelectorAll("[data-action='references']").forEach((button) => button.addEventListener("click", () => goTo(referenceIndex)));
-  syncVideoControls(content);
+  translateInterface();
+  updateVideoLabels(content);
 
   const path = currentPath();
   const position = path.indexOf(current);
@@ -534,17 +619,18 @@ function render() {
   document.querySelector("#slide-position").textContent = `${String(position + 1).padStart(2, "0")} / ${String(path.length).padStart(2, "0")}`;
   document.querySelector(".progress-track").setAttribute("aria-valuemax", String(path.length));
   document.querySelector(".progress-track").setAttribute("aria-valuenow", String(position + 1));
+  document.querySelector(".progress-track").setAttribute("aria-label", t(current <= coreEnd ? "coreProgress" : "supplementProgress"));
   document.querySelector("#progress-fill").style.width = `${((position + 1) / path.length) * 100}%`;
   document.querySelector("#previous-slide").disabled = position === 0;
   document.querySelector("#next-slide").disabled = position === path.length - 1;
   document.querySelector("#next-slide").title = position === path.length - 1 && current <= coreEnd
-    ? "本編はここまでです。目次から補足を開けます"
-    : "次のスライド (→)";
+    ? t("coreEndHint")
+    : t("nextHint");
   const mainEnd = current === coreEnd;
-  document.querySelector("#next-slide").setAttribute("aria-label", mainEnd ? "本編の終わり" : "次のスライド");
-  document.title = `${slide.chapter} — ${slide.title.replaceAll("<br>", " ")} | GitHub Universe 2026`;
+  document.querySelector("#next-slide").setAttribute("aria-label", t(mainEnd ? "coreEnd" : "next"));
+  document.title = `${slide.chapter}: ${slide.title.replaceAll("<br>", " ")} | GitHub Universe 2026`;
   buildToc();
-  announcement.textContent = `${slide.chapter}、${slide.title.replaceAll("<br>", " ")}`;
+  announcement.textContent = `${slide.chapter}: ${slide.title.replaceAll("<br>", " ")}`;
 }
 
 function goTo(index) {
@@ -568,18 +654,18 @@ function previous() {
 
 function buildToc() {
   const groups = [
-    { title: "本編 · Platform", range: [2, 5] },
-    { title: "本編 · Copilot", range: [6, 9] },
-    { title: "本編 · Security", range: [10, 13] },
-    { title: "本編 · まとめ", range: [coreEnd, coreEnd] },
-    { title: "補足 · その他の発表", range: [supplementaryStart, referenceIndex - 1] },
-    { title: "資料", range: [referenceIndex, referenceIndex] },
+    { title: t("mainPlatform"), range: [2, 5] },
+    { title: t("mainCopilot"), range: [6, 9] },
+    { title: t("mainSecurity"), range: [10, 13] },
+    { title: t("mainSummary"), range: [coreEnd, coreEnd] },
+    { title: t("supplements"), range: [supplementaryStart, referenceIndex - 1] },
+    { title: t("resources"), range: [referenceIndex, referenceIndex] },
   ];
   const toc = document.querySelector("#toc-list");
-  toc.innerHTML = `<button type="button" class="toc-entry toc-cover ${current === 0 ? "is-current" : ""}" data-index="0"><span class="toc-index">00</span><span><strong>表紙</strong><small>GitHub Universe 2026 注目アップデート</small></span></button>
-    <button type="button" class="toc-entry toc-cover ${current === 1 ? "is-current" : ""}" data-index="1"><span class="toc-index">01</span><span><strong>全体像</strong><small>3つのテーマと本編の流れ</small></span></button>
+  toc.innerHTML = `<button type="button" class="toc-entry toc-cover ${current === 0 ? "is-current" : ""}" data-index="0"><span class="toc-index">00</span><span><strong>${t("cover")}</strong><small>${t("coverDescription")}</small></span></button>
+    <button type="button" class="toc-entry toc-cover ${current === 1 ? "is-current" : ""}" data-index="1"><span class="toc-index">01</span><span><strong>${t("overview")}</strong><small>${t("overviewDescription")}</small></span></button>
     ${groups.map((group) => {
-      const entries = slides.slice(group.range[0], group.range[1] + 1);
+      const entries = slides.slice(group.range[0], group.range[1] + 1).map((_, i) => getSlide(group.range[0] + i));
       return `<section class="toc-group"><h3>${group.title}</h3>${entries.map((slide, i) => {
         const index = group.range[0] + i;
         const number = index <= 13 ? String(index - 1).padStart(2, "0") : index === coreEnd ? "14" : index === referenceIndex ? "↗" : "＋";
@@ -597,6 +683,10 @@ function buildToc() {
 
 document.querySelector("#previous-slide").addEventListener("click", previous);
 document.querySelector("#next-slide").addEventListener("click", next);
+document.querySelector("#language-toggle").addEventListener("click", () => {
+  language = language === "ja" ? "en" : "ja";
+  render(true);
+});
 document.querySelector("#home-link").addEventListener("click", (event) => {
   event.preventDefault();
   goTo(0);
@@ -612,14 +702,10 @@ document.querySelector("#fullscreen-toggle").addEventListener("click", async () 
     if (document.fullscreenElement) await document.exitFullscreen();
     else await document.documentElement.requestFullscreen();
   } catch {
-    announcement.textContent = "全画面表示を開始できませんでした。ブラウザーの全画面機能をご利用ください。";
+    announcement.textContent = t("fullscreenError");
   }
 });
-document.addEventListener("fullscreenchange", () => {
-  const active = Boolean(document.fullscreenElement);
-  document.querySelector("#fullscreen-toggle").innerHTML = `<span class="fullscreen-icon" aria-hidden="true">${active ? "⛶" : "⛶"}</span><span class="button-label">${active ? "全画面を終了" : "全画面"}</span>`;
-  document.querySelector("#fullscreen-toggle").title = active ? "全画面を終了" : "全画面表示";
-});
+document.addEventListener("fullscreenchange", syncFullscreenLabel);
 document.addEventListener("keydown", (event) => {
   if (dialog.open) return;
   const target = event.target;

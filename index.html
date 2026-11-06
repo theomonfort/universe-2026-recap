@@ -7,21 +7,23 @@
     <meta name="description" content="GitHub Universe 2026の注目アップデートを、日本語で紹介する非公式プレゼンテーションです。">
     <title>GitHub Universe 2026 注目アップデート</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="translations.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#slide">プレゼンテーションへ移動</a>
+    <a class="skip-link" href="#slide" data-i18n="skip">プレゼンテーションへ移動</a>
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="#" id="home-link" aria-label="表紙に戻る">
+        <a class="brand" href="#" id="home-link" aria-label="表紙に戻る" data-i18n-label="home">
           <span class="brand-mark" aria-hidden="true">◎</span>
           <span>UNIVERSE <span class="brand-year">2026</span></span>
         </a>
-        <div class="topbar-note">非公式の日本語まとめ <span aria-hidden="true">·</span> 公式発表へのリンク付き</div>
+        <div class="topbar-note"><span data-i18n="header">非公式の日本語まとめ</span> <span class="note-separator" aria-hidden="true">·</span> <span data-i18n="headerSources">公式発表へのリンク付き</span></div>
         <div class="topbar-actions">
-          <button class="icon-button" id="toc-open" type="button" aria-haspopup="dialog" aria-controls="toc-dialog" title="目次を開く">
+          <button class="icon-button language-button" id="language-toggle" type="button" lang="en" aria-label="Switch to English" title="Switch to English">English</button>
+          <button class="icon-button" id="toc-open" type="button" aria-haspopup="dialog" aria-controls="toc-dialog" title="目次を開く" data-i18n-title="openToc" data-i18n-label="openToc">
             <span class="toc-icon" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="button-label">目次</span>
+            <span class="button-label" data-i18n="toc">目次</span>
           </button>
           <button class="icon-button" id="fullscreen-toggle" type="button" title="全画面表示">
             <span class="fullscreen-icon" aria-hidden="true">⛶</span>
@@ -43,7 +45,7 @@
           <span id="slide-position" class="slide-position"></span>
         </div>
         <div class="navigation">
-          <button id="previous-slide" class="nav-button" type="button" aria-label="前のスライド" title="前のスライド (←)">
+          <button id="previous-slide" class="nav-button" type="button" aria-label="前のスライド" title="前のスライド (←)" data-i18n-label="previous" data-i18n-title="previousHint">
             <span aria-hidden="true">←</span>
           </button>
           <button id="next-slide" class="nav-button nav-next" type="button" aria-label="次のスライド" title="次のスライド (→)">
@@ -57,12 +59,12 @@
       <div class="dialog-header">
         <div>
           <p class="eyebrow">SLIDE INDEX</p>
-          <h2 id="toc-title">目次</h2>
+          <h2 id="toc-title" data-i18n="toc">目次</h2>
         </div>
-        <button id="toc-close" class="icon-button close-button" type="button" aria-label="目次を閉じる">×</button>
+        <button id="toc-close" class="icon-button close-button" type="button" aria-label="目次を閉じる" data-i18n-label="closeToc">×</button>
       </div>
       <div id="toc-list" class="toc-list"></div>
-      <p class="dialog-hint">← → キーで移動 <span aria-hidden="true">·</span> Escで閉じる</p>
+      <p class="dialog-hint" data-i18n="tocHint">← → キーで移動 / Escで閉じる</p>
     </dialog>
     <div id="announcements" class="visually-hidden" role="status" aria-live="polite"></div>
   </body>
