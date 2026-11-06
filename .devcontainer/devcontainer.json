@@ -1,0 +1,12 @@
+{
+  "name": "Universe 2026 presentation",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Universe 2026 presentation",
+      "onAutoForward": "openBrowser",
+      "visibility": "private"
+    }
+  }
+}

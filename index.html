@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="GitHub Universe 2026の注目アップデートを、日本語で紹介する非公式プレゼンテーションです。">
+    <title>GitHub Universe 2026 注目アップデート</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#slide">プレゼンテーションへ移動</a>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" id="home-link" aria-label="表紙に戻る">
+          <span class="brand-mark" aria-hidden="true">◎</span>
+          <span>UNIVERSE <span class="brand-year">2026</span></span>
+        </a>
+        <div class="topbar-note">非公式の日本語まとめ <span aria-hidden="true">·</span> 公式発表へのリンク付き</div>
+        <div class="topbar-actions">
+          <button class="icon-button" id="toc-open" type="button" aria-haspopup="dialog" aria-controls="toc-dialog" title="目次を開く">
+            <span class="toc-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="button-label">目次</span>
+          </button>
+          <button class="icon-button" id="fullscreen-toggle" type="button" title="全画面表示">
+            <span class="fullscreen-icon" aria-hidden="true">⛶</span>
+            <span class="button-label">全画面</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="slide" class="slide-stage" tabindex="-1" aria-live="polite">
+        <div id="slide-content"></div>
+      </main>
+
+      <footer class="bottombar">
+        <div class="progress-group">
+          <span id="chapter-label" class="chapter-label"></span>
+          <div class="progress-track" role="progressbar" aria-label="本編の進行状況" aria-valuemin="1" aria-valuemax="14" aria-valuenow="1">
+            <span id="progress-fill"></span>
+          </div>
+          <span id="slide-position" class="slide-position"></span>
+        </div>
+        <div class="navigation">
+          <button id="previous-slide" class="nav-button" type="button" aria-label="前のスライド" title="前のスライド (←)">
+            <span aria-hidden="true">←</span>
+          </button>
+          <button id="next-slide" class="nav-button nav-next" type="button" aria-label="次のスライド" title="次のスライド (→)">
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+
+    <dialog id="toc-dialog" class="toc-dialog" aria-labelledby="toc-title">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">SLIDE INDEX</p>
+          <h2 id="toc-title">目次</h2>
+        </div>
+        <button id="toc-close" class="icon-button close-button" type="button" aria-label="目次を閉じる">×</button>
+      </div>
+      <div id="toc-list" class="toc-list"></div>
+      <p class="dialog-hint">← → キーで移動 <span aria-hidden="true">·</span> Escで閉じる</p>
+    </dialog>
+    <div id="announcements" class="visually-hidden" role="status" aria-live="polite"></div>
+  </body>
+</html>
