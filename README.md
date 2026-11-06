@@ -2,6 +2,14 @@
 
 GitHub Universe 2026の公式recapをもとにした、非公式の日本語・英語プレゼンテーションです。Platform・Copilot・Securityの動画付き12トピックを本編に、その他の発表を目次から開ける補足にまとめています。動画の視聴にはインターネット接続が必要です。
 
+## 公開サイト / Live site
+
+**https://theomonfort.github.io/universe-2026-recap/**
+
+右上の **English** / **日本語** で言語を切り替えられます。GitHub Pagesは `main` ブランチのルート (`/`) から公開し、`main` へのpushで更新されます。
+
+Switch languages with **English** / **日本語** in the top bar. GitHub Pages publishes the root (`/`) of `main` and updates automatically when changes are pushed to `main`.
+
 ## ローカルでプレビュー / Local preview
 
 `index.html` をブラウザーで開くか、このディレクトリで `python3 -m http.server 8000 --bind 127.0.0.1` を実行して http://localhost:8000 を開きます。依存パッケージやビルドは不要です。
